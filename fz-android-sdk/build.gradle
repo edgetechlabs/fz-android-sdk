@@ -1,5 +1,29 @@
 apply plugin: 'com.android.library'
 
+ext {
+    bintrayRepo = 'fz-android-sdk'
+    bintrayName = 'fz-android-sdk'
+
+    publishedGroupId = 'com.fretzealot'
+    libraryName = 'fz-android-sdk'
+    artifact = 'fz-android-sdk'
+
+    libraryDescription = 'Fret Zealot\'s Android SDK'
+
+    siteUrl = 'www.fretzealot.com'
+    gitUrl = 'https://github.com/edgetechlabs/fz-android-sdk'
+
+    libraryVersion = '1.0.0'
+
+    developerId = 'developerId'
+    developerName = 'Developer Name'
+    developerEmail = 'developer@email.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
+
 android {
     compileSdkVersion 25
     buildToolsVersion '26.0.2'
@@ -7,7 +31,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 24
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
     }
     buildTypes {
         release {
@@ -39,3 +63,6 @@ dependencies {
 
     compile files('libs/achartengine-1.1.0.jar')
 }
+
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'

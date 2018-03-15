@@ -165,12 +165,13 @@ All the commands are held in a **command buffer**. This means that the commands 
 
 Also, the parameters commonly used are:
 
-**fret** and **string** - These are self explanatory
+**fret** and **string** - Fret is self explanatory, and the valid range is 0 (Open) to 14. The tuning is read from the 5th string to the 0th string: E-A-D-G-B-E. Hence, the string indices would be as follows: E=5, A=4, D=3, G=2, B=1, E=0
+
 
 **red, blue** and **green** - These are the values for the LED color. Possible values for each can be between 0 and 15.
 
 **intensity** - The intensity of the LED. Possible values are between 0 and 10.
-**fadeMode** - The fade effect with which ti light up the LED.
+**fadeMode** - The fade effect with which to light up the LED.
 Possible values for **fadeMode** are between 0 and 4.
 
 Fade effect reference chart:
@@ -178,7 +179,7 @@ Fade effect reference chart:
 Fade Mode Value          Description
 
 
-     0                 Fade not active    //Set Pixel On
+     0                 Fade not active    //Set Pixel On  **Most Common**
      1                 Fade in short      //Fade in Pixel over 50ms
      2                 Fade in long       //Fade out Pixel over 50ms
      3                 Fade out short     //Fade in Pixel over 200ms
@@ -203,7 +204,7 @@ The `set_all` method - This method lights up the whole fretboard with the LED co
 mLib.set_all((byte)string, (byte)red, (byte)blue, (byte)green, (byte)intensity, (byte)fadeMode);
 ```
 
-The `set_subset` method - This method lights up a string from a given fret to the 16th fret. For example, if you need to turn on the LEDs from fret 8 to fret 16, this is the method for you. However, the upper limit (16) cannot be changed.
+The `set_subset` method - This method lights up a string from a given fret to the 14th fret. For example, if you need to turn on the LEDs from fret 8 to fret 14, this is the method for you. However, the upper limit (14) cannot be changed.
 ```java
 mLib.set_subset((byte)starting_fret, (byte)string, (byte)red, (byte)blue, (byte)green, (byte)intensity, (byte)fadeMode);
 ```
@@ -281,7 +282,7 @@ The `isConnected()` method - This method returns boolean value **true** if fretb
 
  **strand_start** :
 
- **intensity** : Lights intensity on fretboard
+ **intensity** : LED intensity on fretboard
 
  **fade_mode**:
  ```

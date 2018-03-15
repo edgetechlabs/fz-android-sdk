@@ -19,7 +19,12 @@ Under the ``` <application> ``` tag in your manifest, add the following lines
 
 To integrate this BLE library in android application minimum **Android version 19** is required
 
-   <p> **In the activity where the library is used for the first time in the application lifecycle. DO NOT call `finish();` in this activity since the library instance is created using its context.**  </p>
+   <p>
+    
+   **In the activity where the library is used for the first time in the application lifecycle, DO NOT call `finish();` since the library instance is created using its context throughout the app.**
+   
+   </p>
+   
 
 ```java
      private LEDBLELib mLib;

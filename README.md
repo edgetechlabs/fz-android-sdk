@@ -1,9 +1,9 @@
 <h1>BLE Library</h1>
 
 <h2> Integration </h2>
-<p>In order to integrate the BLE library, it can be imported as a module in Android Studio as follows:</p>
+<p>In order to integrate the BLE library, add dependency on app level build.gradle file. </p>  
 
-`File -> New -> Import module` and follow the steps shown by the wizard.
+```compile 'com.fretzealot:fz-android-sdk:1.0.0' ``` 
 
 
 Under the ``` <application> ``` tag in your manifest, add the following lines
@@ -216,23 +216,35 @@ The `sendCommandBufferClear` method - This method clears the buffer of any exist
 mLib.sendCommandBufferClear();
 ```
 
-The `sendCommandFlush()` method - This method dumps the contents (up to 5 commands) of the **command buffer** to the BLE device
+The `sendCommandFlush()` method - This method dumps the contents (up to 5 commands) of the **command buffer** to the BLE device. A minimum of 1 ms is required as the value of `DELAY`. Please ensure that this method is always called in a `Handler`'s runnable with delay. 
 ```java
-mLib.sendCommandFlush();
+  private static final int DELAY = 1;
+  new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                            mBLE.sendCommandFlush();
+                    }
+                }, DELAY);
 ```
 
-Commands should be wrapped in these utility commands, to ensure delivery to the Fret Zealot
-A typical command to set completely new pixels --  (C) major Triad in Standard Tuning
+LED commands should be wrapped in these utility commands, to ensure delivery to the Fret Zealot.
+A typical command to set completely new pixels --  (C) major Triad in Standard Tuning looks as follows:
 ```java
 mLib.sendCommandBufferClear();          // Flush the buffer
 mLib.clear();                           //Clear all displayed Pixels
 mLib.set((byte) 3, (byte) 4, (byte) 0, (byte) 15, (byte) 0, (byte) 9, (byte) 0);  // Set 'C' to blue
 mLib.set((byte) 2, (byte) 3, (byte) 0, (byte) 0, (byte) 15, (byte) 9, (byte) 0);  // Set 'E' to green
 mLib.set((byte) 0, (byte) 2, (byte) 15, (byte) 15, (byte) 15, (byte) 9, (byte) 0);  // Set 'G' to blue
-mLib.sendCommandFlush();                // Write commands to the Fret Zealot
+private static final int DELAY = 1;
+new Handler().postDelayed(new Runnable() {
+                  @Override
+                  public void run() {
+                          mBLE.sendCommandFlush();
+                  }
+              }, DELAY);             // Send commands to the Fret Zealot
 
 ```
-The `onResume()` method - This method reconnects the bluetooth connection when an activity is resumed.
+The `onResume()` method - This method reconnects the bluetooth connection when an activity is resumed. Please ensure to call mLib.onResume() each time before starting to send commands to the Fret Zealot.
 ```java
    @Override
      protected void onResume() {
@@ -268,7 +280,7 @@ The `isConnected()` method - This method returns boolean value **true** if fretb
 
  **fade_mode**:
  ```
-        fade_mode                      Description
+        fade_mode                              Description
 
            0                                    No lights
            1                                    Sparkler
@@ -278,7 +290,15 @@ The `isConnected()` method - This method returns boolean value **true** if fretb
   ```java
     mLib.sendCommandBufferClear();
     mLib.set_display((byte) strand_start, (byte) intensity, (byte) fadValue);
-    mLib.sendCommandFlush();
+    private static final int DELAY = 1;
+    new Handler().postDelayed(new Runnable() {
+                      @Override
+                      public void run() {
+                              mBLE.sendCommandFlush();
+                      }
+                  }, DELAY);
   ```
+
+
 
 

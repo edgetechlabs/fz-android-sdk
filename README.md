@@ -304,6 +304,22 @@ The `isConnected()` method - This method returns boolean value **true** if fretb
                       }
                   }, DELAY);
   ```
+  
+  ## Color Templates
+|  Function | Color | FZ RGB | 
+| --- | --- | ---|
+| Index Finger | Blue | [0,0,15] |
+| Middle Finger | Green | [0,15,0] |
+| Ring Finger | Yellow | [12,15,0] |
+| Finger Finger | Purple | [12,0,15] |
+| Open String | White | [12,15,15] |
+| Muted String | Red | [4,0,0] |
+
+*use the ‘set_across’ command for muting*
+       
+## Fret Zealot App Representation
+![FZ Screenshot](https://lh6.googleusercontent.com/riXRYishfZ3SDHLiQkfH--bzlYG1f1-O2WPpCButJpo2VNoBTRHY6e4JW5zt8qga_lHDiskN6T5wv-LBkBtjQfvErAmTwPXX6DRquFGhrt01y7zzXYCouTsz4-Ltid4_m7Fk4C5q "FZ App Screenshot")
+
 
 
 

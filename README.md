@@ -9,8 +9,13 @@
 Under the ``` <application> ``` tag in your manifest, add the following lines
 
 ```java
+        <uses-permission android:name="android.permission.BLUETOOTH" />
+   <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+      ... 
         <service
-            android:name="com.fz.LED.BluetoothLeService"
+            android:name="com.fz.blelib.BluetoothLeService"
             android:enabled="true" >
         </service>
 ```
@@ -91,6 +96,8 @@ And in order to connect to a device, the following method needs to be called:
 
  ```java
  mLib.connect(deviceAddress)
+ OR
+ mLib.startService() --> Below
  ```
 
 where **deviceAddress** is a `String`.
@@ -250,7 +257,7 @@ new Handler().postDelayed(new Runnable() {
               }, DELAY);             // Send commands to the Fret Zealot
 
 ```
-The `onResume()` method - This method reconnects the bluetooth connection when an activity is resumed. Please ensure to call mLib.onResume() each time before starting to send commands to the Fret Zealot.
+The `onResume()` method - This method reconnects the bluetooth connection when an app activity is resumed. (For example moved to background/foreground) Please ensure to call mLib.onResume() each time the app is refocused.
 ```java
    @Override
      protected void onResume() {

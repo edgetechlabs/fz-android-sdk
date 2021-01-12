@@ -1,52 +1,182 @@
-<h1>BLE Library</h1>
+## BLE Library
 
-<h2> Integration </h2>
-<p>In order to integrate the BLE library, add dependency on app level build.gradle file. </p>  
-
-```compile 'com.fretzealot:fz-android-sdk:1.0.0' ``` 
-
-
-Under the ``` <application> ``` tag in your manifest, add the following lines
+## Integration
+In order to integrate the BLE library, add dependency on app level build.gradle file.
 
 ```java
-        <uses-permission android:name="android.permission.BLUETOOTH" />
-   <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-      ... 
-        <service
-            android:name="com.fz.blelib.BluetoothLeService"
-            android:enabled="true" >
-        </service>
+implementation 'com.fretzealot:fz-android-sdk:1.0.0'
 ```
-<h2> Usage </h2>
-<p>While using the library for the first time in the app, a library instance should be created as follows: </p>
+
+
+Under the ``` <manifest> ``` tag in your manifest, add the permissions:
+```java
+<uses-permission android:name="android.permission.BLUETOOTH" />
+<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+```
+Register following service in manfest file inside `<application>` tag:
+```java
+<service
+  android:name="com.fz.blelib.BluetoothLeService"
+  android:enabled="true" />
+```
+## Usage
+While using the library for the first time in the app, a library instance should be created as follows:
 
 To integrate this BLE library in android application minimum **Android version 19** is required
 
-   <p>
-    
-   **In the activity where the library is used for the first time in the application lifecycle, DO NOT call `finish();` since the library instance is created using its context throughout the app.**
-   
-   </p>
-   
+
+
+   **In the activity where the library is used for the first time in the application lifecycle, DO NOT call `finish();` since the library instance is created using its context throughout the app. See below example activity:**
 
 ```java
-     private LEDBLELib mLib;
+package com.fretzealot.led;
 
-     @Override
-     protected void onCreate(Bundle savedInstanceState) {
+import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGattService;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
-        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+import com.fz.blelib.LEDBLELib;
+import com.fz.blelib.LEDBLELibCallback;
 
-            //BLE is not supported, library can't be used in the app
+import java.util.List;
 
+public class MainActivity extends AppCompatActivity {
+    private static final int REQUEST_ENABLE_BT = 101;
+ private static final int PERMISSION_CODE = 102;
+  LEDBLELib ledbleLib;
 
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+  setContentView(R.layout.activity_main);
+  ledbleLib = LEDBLELib.getInstance(getApplicationContext());
+ if (ledbleLib.isSupported()) {
+            if (ledbleLib.isEnabled()) {
+                checkForPermissions();
+  } else {
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+  startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+  }
         } else {
-            mLib = LEDBLELib.getInstance(this);
-        }
+            Toast.makeText(this, "Bluetooth not supported", Toast.LENGTH_LONG).show();
+  }
+    }
 
-     }
+    @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+ if (requestCode == REQUEST_ENABLE_BT && resultCode == RESULT_OK) {
+            checkForPermissions();
+  }
+    }
+
+    private void checkForPermissions() {
+        if (hasPermissions(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            startScanner();
+  } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}
+                    , PERMISSION_CODE);
+  }
+    }
+
+    private boolean hasPermissions(String... permissions) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+  }
+            }
+        }
+        return true;
+  }
+
+    @Override
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+ if (requestCode == PERMISSION_CODE) {
+            for (int grantResult : grantResults) {
+                if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Location permission required to connect fretzealot", Toast.LENGTH_LONG).show();
+ return;  }
+            }
+            startScanner();
+  }
+    }
+
+    private void startScanner() {
+        ledbleLib.startScan(new BluetoothAdapter.LeScanCallback() {
+            @Override
+  public void onLeScan(BluetoothDevice bluetoothDevice, int i, byte[] bytes) {
+                if (bluetoothDevice != null && bluetoothDevice.getName() != null && bluetoothDevice.getName().toLowerCase().equals("fret zealot")) {
+                    ledbleLib.stopScan();
+  startConnectionService(bluetoothDevice.getAddress());
+  }
+            }
+        });
+  }
+
+    private void startConnectionService(String address) {
+        ledbleLib.startService(address, new LEDBLELibCallback() {
+            @Override
+  public void onConnected() {
+                Toast.makeText(MainActivity.this, "Fret zealot connected", Toast.LENGTH_LONG).show();
+  }
+
+            @Override
+  public void onDisconnected() {
+                Toast.makeText(MainActivity.this, "Fret zealot disconnected", Toast.LENGTH_LONG).show();
+  }
+
+            @Override
+  public void onServiceDiscovered(List<BluetoothGattService> serviceList) {
+
+            }
+
+            @Override
+  public void onDataReceived(byte[] rxBytes) {
+
+            }
+
+            @Override
+  public void onBatteryString(String value) {
+
+            }
+
+            @Override
+  public void onManufactureNameString(String value) {
+
+            }
+
+            @Override
+  public void onModelNumberString(String value) {
+
+            }
+
+            @Override
+  public void onSerialNumberString(String value) {
+
+            }
+
+            @Override
+  public void onHardwareRevisionString(String value) {
+
+            }
+        });
+        ledbleLib.onResume();
+  }
+
+}
 ```
 
 
@@ -55,42 +185,6 @@ The next time the library is instantiated (*ideally in a different class*), it c
  ```java
  mLib = LEDBLELib.getInstance();
  ```
-
-<p> Following are the steps to initiate scanning and connecting to Fret Zealot </p>
-
-```java
-     mLib.startScan(mLeScanCallback);
-     private BluetoothAdapter.LeScanCallback mLeScanCallback =
-             new BluetoothAdapter.LeScanCallback() {
-
-                 @Override
-                 public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-                     runOnUiThread(new Runnable() {
-                         @Override
-                         public void run() {
-                             if (!mLeDevices.contains(device)) {
-                                 if (device.getName() != null) {
-                                     if (device.getName().toLowerCase().contains("fret zealot")) {
-                                         mLeDevices.add(device);
-                                     }
-                                 }
-                                 if (device.getName() != null) {
-                                     if (device.getName().toLowerCase().contains("fret zealot")) {
-                                         deviceAdapter.notifyItemInserted(mLeDevices.size() - 1);
-
-                                     }
-                                 }
-                             }
-                             if (btEnabled) {
-                                 hideProgressDialog();
-                             }
-                         }
-
-                     });
-                 }
-
-```
-
 
 And in order to connect to a device, the following method needs to be called:
 
@@ -229,7 +323,7 @@ The `sendCommandBufferClear` method - This method clears the buffer of any exist
 mLib.sendCommandBufferClear();
 ```
 
-The `sendCommandFlush()` method - This method dumps the contents (up to 5 commands) of the **command buffer** to the BLE device. A minimum of 1 ms is required as the value of `DELAY`. Please ensure that this method is always called in a `Handler`'s runnable with delay. 
+The `sendCommandFlush()` method - This method dumps the contents (up to 5 commands) of the **command buffer** to the BLE device. A minimum of 1 ms is required as the value of `DELAY`. Please ensure that this method is always called in a `Handler`'s runnable with delay.
 ```java
   private static final int DELAY = 1;
   new Handler().postDelayed(new Runnable() {
@@ -311,9 +405,9 @@ The `isConnected()` method - This method returns boolean value **true** if fretb
                       }
                   }, DELAY);
   ```
-  
+
   ## Color Templates
-|  Function | Color | FZ RGB | 
+|  Function | Color | FZ RGB |
 | --- | --- | ---|
 | Index Finger | Blue | [0,0,15] |
 | Middle Finger | Green | [0,15,0] |
@@ -323,11 +417,6 @@ The `isConnected()` method - This method returns boolean value **true** if fretb
 | Muted String | Red | [4,0,0] |
 
 *use the ‘set_across’ command for muting*
-       
+
 ## Fret Zealot App Representation
 ![FZ Screenshot](https://lh6.googleusercontent.com/riXRYishfZ3SDHLiQkfH--bzlYG1f1-O2WPpCButJpo2VNoBTRHY6e4JW5zt8qga_lHDiskN6T5wv-LBkBtjQfvErAmTwPXX6DRquFGhrt01y7zzXYCouTsz4-Ltid4_m7Fk4C5q "FZ App Screenshot")
-
-
-
-
-
